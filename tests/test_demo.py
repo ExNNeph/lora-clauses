@@ -22,6 +22,7 @@ def app(monkeypatch, tmp_path):
 def test_compares_base_and_lora_on_a_real_clause(app, monkeypatch):
     at = app.run()
     assert not at.exception
+    at.selectbox[0].set_value(3).run()  # en-freelance-dev#4: ip_full_transfer + rights_before_payment
     at.button[0].click().run()
     assert not at.exception
     text = " ".join(w.value for w in at.warning)
