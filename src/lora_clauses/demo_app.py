@@ -33,13 +33,13 @@ with st.sidebar:
 
 labels = [f"{e['id']} · " + (", ".join(e["risks"]) or "fair") for e in EXAMPLES]
 pick = st.selectbox("Example clause from a real contract (label after the dot)", range(len(EXAMPLES)),
-                    format_func=lambda i: labels[i], index=3)
+                    format_func=lambda i: labels[i], index=10)
 clause = st.text_area("Clause (edit it or paste your own, English or German)", EXAMPLES[pick]["clause"], height=120)
 gold = EXAMPLES[pick]["risks"] if clause == EXAMPLES[pick]["clause"] else None
 
 
 def show(title: str, p: predict.Prediction) -> None:
-    st.subheader(title)
+    st.markdown(f"#### {title}")
     if p.risks is None:
         st.error("Invalid answer (not JSON with known risk ids)")
     elif not p.risks:
@@ -58,11 +58,11 @@ def show(title: str, p: predict.Prediction) -> None:
 if st.button("Label the clause", type="primary") and clause.strip():
     cols = st.columns(3 if use_claude else 2)
     with cols[0], st.spinner("base model …"):
-        show("Base model (full taxonomy in the prompt)", predict.local(clause))
+        show("Base model · full taxonomy in prompt", predict.local(clause))
     with cols[1]:
         if HAS_ADAPTER:
             with st.spinner("LoRA model …"):
-                show("Base + LoRA adapter (one-line prompt)", predict.local(clause, predict.ADAPTER))
+                show("LoRA model · one-line prompt", predict.local(clause, predict.ADAPTER))
         else:
             st.subheader("Base + LoRA adapter")
             st.info("Train the adapter first: `lora-clauses train`.")
