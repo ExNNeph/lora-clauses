@@ -54,5 +54,33 @@
    "prompt_tokens": 149,
    "cost_per_1k": 0.0
   }
+ },
+ "claude": {
+  "real": {
+   "n": 47,
+   "exact": 0.979,
+   "precision": 0.971,
+   "recall": 1.0,
+   "f1": 0.986,
+   "fair_flagged": "1/15",
+   "invalid": 0,
+   "latency_s": 1.458,
+   "tokens_per_s": 11.6,
+   "prompt_tokens": 1277,
+   "cost_per_1k": 5.43
+  },
+  "synth": {
+   "n": 248,
+   "exact": 0.948,
+   "precision": 0.926,
+   "recall": 0.989,
+   "f1": 0.956,
+   "fair_flagged": "0/88",
+   "invalid": 0,
+   "latency_s": 1.558,
+   "tokens_per_s": 11.1,
+   "prompt_tokens": 1376,
+   "cost_per_1k": 5.84
+  }
  }
 }

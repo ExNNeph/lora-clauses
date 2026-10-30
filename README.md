@@ -16,7 +16,7 @@ used for training or shown to Claude when it wrote the data.
 |---|---|---|---|---|---|---|
 | base Qwen3-1.7B (taxonomy in the prompt) | 66% | 63% | 6 / 15 | 0.89 s | 586 | $0 |
 | **base + LoRA adapter** (one-line prompt) | **85%** | **87%** | 3 / 15 | **0.31 s** | **89** | **$0** |
-| Claude `claude-opus-5-5` (taxonomy in the prompt) | CLAUDE_EXACT | CLAUDE_F1 | CLAUDE_FAIR | CLAUDE_LAT | CLAUDE_PT | CLAUDE_COST |
+| Claude `claude-opus-5-5` (taxonomy in the prompt) | 98% | 99% | 1 / 15 | 1.46 s | 1,277 | $5.43 |
 
 All numbers, including the 248-clause synthetic test set, are under [Results](#results).
 
@@ -121,7 +121,7 @@ lora-clauses demo                       # web demo on http://localhost:8501
 python data/generate.py                 # rewrite the synthetic data (needs ANTHROPIC_API_KEY, about $4)
 lora-clauses train                      # about 25 minutes on an M1 Pro, writes adapters/
 python evals/run_eval.py base lora      # local benchmark, no key, about 10 minutes
-python evals/run_eval.py claude         # the Claude row (needs ANTHROPIC_API_KEY, about CLAUDE_TOTAL)
+python evals/run_eval.py claude         # the Claude row (needs ANTHROPIC_API_KEY, about $1.70)
 pytest                                  # unit, data and demo tests; no MLX, no API
 ```
 
@@ -137,7 +137,14 @@ Both test sets were held out from training. Exact match: the clause's set of ris
 recall and F1 count (clause, risk) pairs. Latency and tokens per second are per clause on the M1 Pro (local) or
 over the network (Claude; its output tokens include its thinking, so tokens/s is not comparable to the local rows).
 
-RESULTS_TABLE
+| system | test set | exact match | precision | recall | F1 | fair flagged | invalid | latency | tokens/s | prompt tokens | $ per 1k clauses |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| base Qwen3-1.7B-4bit | real (47) | 66% | 48% | 94% | 63% | 6/15 | 0 | 0.89 s | 129 | 586 | $0 |
+| base Qwen3-1.7B-4bit | synth (248) | 33% | 18% | 64% | 28% | 48/88 | 7 | 1.05 s | 127 | 646 | $0 |
+| **base + LoRA adapter** | real (47) | **85%** | 86% | 88% | **87%** | 3/15 | 3 | **0.31 s** | 78 | **89** | **$0** |
+| **base + LoRA adapter** | synth (248) | **90%** | 89% | 94% | **91%** | 13/88 | 0 | **0.39 s** | 78 | **149** | **$0** |
+| Claude `claude-opus-5-5` | real (47) | 98% | 97% | 100% | 99% | 1/15 | 0 | 1.46 s | 12 | 1,277 | $5.43 |
+| Claude `claude-opus-5-5` | synth (248) | 95% | 93% | 99% | 96% | 0/88 | 0 | 1.56 s | 11 | 1,376 | $5.84 |
 
 **What the numbers show**
 
@@ -150,7 +157,7 @@ RESULTS_TABLE
 - **Cheaper and faster than the base model, too.** The shorter prompt cuts the prompt from about 590 to about 90
   tokens, and latency from 0.9 s to 0.3 s per clause. Output speed per token drops (78 vs 128 tokens/s, the
   adapter adds work per token), but the answers are short.
-- CLAUDE_TAKEAWAY
+- **Claude is still better, and costs about half a cent per clause.** 98% exact match on the real clauses (46 of 47), no invalid answers, and no fair synthetic clause flagged. Its one miss is a borderline case: a German exclusivity that is paid separately (EUR 500), which the label calls fair. The LoRA model closes most of the gap from the base model (66% to 85% exact match on the real clauses) at no API cost and about 5x lower latency on one laptop, but not all of it. A reasonable split: the local model for bulk or private pre-screening, Claude where every clause counts. (Claude's prompt token count is higher because of its tokenizer and the structured output schema; it is billed, the local tokens are not.)
 
 **The LoRA model's 10 mistakes on the real clauses**
 
